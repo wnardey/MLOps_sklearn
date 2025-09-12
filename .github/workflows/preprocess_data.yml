@@ -43,5 +43,5 @@ jobs:
         env:
           WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}   # agrega este secret en Settings → Secrets → Actions
           WANDB_PROJECT: MLOps-sklearn                  # opcional; tu script ya tiene este default
-          # WANDB_ENTITY: tu-equipo                      # opcional si usas team/org en W&B
+          
         run: python src/data/preprocess.py --IdExecution ${{ github.run_number }}
