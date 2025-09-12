@@ -13,12 +13,6 @@ jobs:
   load_data:
     runs-on: ubuntu-latest
 
-    # Variables de entorno para W&B
-    env:
-      WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}   # <— agrega este secret en GitHub
-      WANDB_PROJECT: MLOps-sklearn                  # opcional (tu código tiene este default)
-      # WANDB_ENTITY: tu-equipo                     # opcional (deja comentada si usas tu cuenta)
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -35,8 +29,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Login to Weights & Biases
-        run: wandb login $WANDB_API_KEY
+      - name: Run load.py (log W&B Artifact)
+        env:
+          WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}   # <-- define este secret en el repo
+          WANDB_PROJECT: MLOps-sklearn                  # opcional (tu script ya tiene este default)
 
-      - name: Run load.py (log artifact)
         run: python src/data/load.py --IdExecution ${{ github.run_number }}
