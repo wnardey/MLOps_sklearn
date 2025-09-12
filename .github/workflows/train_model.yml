@@ -43,4 +43,4 @@ jobs:
         env:
           WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}   
           WANDB_PROJECT: MLOps-sklearn                  
-        run: python src/data/train.py --IdExecution ${{ github.run_number }}
+        run: python src/model/train.py --IdExecution ${{ github.run_number }}
