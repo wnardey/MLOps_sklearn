@@ -1,7 +1,7 @@
 name: Evaluate Model on Test (to W&B)
 
 on:
-  #tras completar el entrenamiento corremos la evaluacion
+  #Autorun: tras completar el entrenamiento corremos la evaluacion
   workflow_run:
     workflows: ["Train Model to W&B (artifact)"]
     types: [completed]
