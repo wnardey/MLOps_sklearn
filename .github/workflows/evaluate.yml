@@ -1,0 +1,46 @@
+name: Evaluate Model on Test (to W&B)
+
+on:
+  # Auto: tras completar el entrenamiento
+  workflow_run:
+    workflows: ["Train Model to W&B (artifact)"]
+    types: [completed]
+
+  # También al cambiar el código/YAML
+  push:
+    branches: [ main ]
+    paths:
+      - 'evaluate.py'
+      - 'requirements.txt'
+      - '.github/workflows/evaluate_model.yml'
+
+  # Manual desde Actions
+  workflow_dispatch:
+
+jobs:
+  evaluate:
+    # Si viene de workflow_run, corre solo si Train terminó OK
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run evaluate.py (consume processed+model y loguea métricas)
+        env:
+          WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
+          WANDB_PROJECT: MLOps-sklearn     # opcional (tu script también tiene default)
+        run: python evaluate.py --IdExecution ${{ github.run_number }}
