@@ -31,12 +31,11 @@ def read_npz(dirpath: str, split: str):
 
 def preprocess_and_log(IdExecution: str = "", scale: bool = True, with_mean: bool = True, with_std: bool = True):
     project = os.getenv("WANDB_PROJECT", "MLOps-sklearn")
-    entity  = os.getenv("WANDB_ENTITY")  # opcional
     run_name = f"Preprocess ExecId-{IdExecution}" if IdExecution else "Preprocess"
 
     steps = {"scale": bool(scale), "scaler": "standard", "with_mean": bool(with_mean), "with_std": bool(with_std)}
 
-    with wandb.init(project=project, entity=entity, name=run_name, job_type="preprocess-data") as run:
+    with wandb.init(project=project, name=run_name, job_type="preprocess-data") as run:
         # 1) Consumir artifact RAW
         raw_art = run.use_artifact(RAW_ART_NAME)
         raw_dir = raw_art.download()
