@@ -1,0 +1,42 @@
+name: Load Raw Data to W&B (artifact)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/data/load.py'
+      - 'requirements.txt'
+      - '.github/workflows/load_data.yml'
+  workflow_dispatch:
+
+jobs:
+  load_data:
+    runs-on: ubuntu-latest
+
+    # Variables de entorno para W&B
+    env:
+      WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}   # <— agrega este secret en GitHub
+      WANDB_PROJECT: MLOps-sklearn                  # opcional (tu código tiene este default)
+      # WANDB_ENTITY: tu-equipo                     # opcional (deja comentada si usas tu cuenta)
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Login to Weights & Biases
+        run: wandb login $WANDB_API_KEY
+
+      - name: Run load.py (log artifact)
+        run: python src/data/load.py --IdExecution ${{ github.run_number }}
