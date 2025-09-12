@@ -1,0 +1,47 @@
+name: Preprocess Raw Data to W&B (artifact)
+
+on:
+  # Se ejecuta automáticamente cuando termine el workflow de Load
+  workflow_run:
+    workflows: ["Load Raw Data to W&B (artifact)"]
+    types: [completed]
+
+  # También cuando hagas cambios en el código de preprocess o en este YAML
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/data/preprocess.py'
+      - 'requirements.txt'
+      - '.github/workflows/preprocess_data.yml'
+
+  # Y lo puedes lanzar manualmente
+  workflow_dispatch:
+
+jobs:
+  preprocess_data:
+    # Si viene de workflow_run, solo corre si el de Load terminó OK
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run preprocess.py (consume raw y publica processed)
+        env:
+          WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}   # agrega este secret en Settings → Secrets → Actions
+          WANDB_PROJECT: MLOps-sklearn                  # opcional; tu script ya tiene este default
+          # WANDB_ENTITY: tu-equipo                      # opcional si usas team/org en W&B
+        run: python src/data/preprocess.py --IdExecution ${{ github.run_number }}
