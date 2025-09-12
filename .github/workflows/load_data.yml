@@ -37,7 +37,7 @@ jobs:
 
       - name: Run load.py (log W&B Artifact)
         env:
-          WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}   # <-- define este secret en el repo
-          WANDB_PROJECT: MLOps-sklearn                  # opcional (tu script ya tiene este default)
+          WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}   
+          WANDB_PROJECT: MLOps-sklearn                  #
 
         run: python src/data/load.py --IdExecution ${{ github.run_number }}
