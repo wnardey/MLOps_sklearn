@@ -1,30 +1,46 @@
-name: Train Model like artifact to wandb
+name: Train Model to W&B (artifact)
 
 on:
+  # Correr automáticamente cuando termine el Preprocess
+  workflow_run:
+    workflows: ["Preprocess Raw Data to W&B (artifact)"]
+    types: [completed]
+
+  # También por cambios en el código o en este YAML
   push:
-    branches:
-      - main
+    branches: [ main ]
     paths:
-      - 'src/model/train.py'
+      - 'train.py'
+      - 'requirements.txt'
+      - '.github/workflows/train_model.yml'
+
+  # Y manualmente desde Actions
+  workflow_dispatch:
 
 jobs:
   train_model:
+    # Si viene de workflow_run, solo corre si Preprocess terminó OK
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      id: setup
-      with:
-        python-version: '3.9'
-        cache: 'pip'
-    - name: Install dependencies
-      #if: steps.setup.outputs.cache-hit != 'true'  
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: Login to WandB
-      run: wandb login ${{ secrets.WANDB_API_KEY }}
-    - name: Run train.py
-      run: python src/model/train.py --IdExecution ${{ github.run_number }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run train.py (consume processed y publica modelo)
+        env:
+          WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}   
+          WANDB_PROJECT: MLOps-sklearn                  
+        run: python train.py --IdExecution ${{ github.run_number }}
