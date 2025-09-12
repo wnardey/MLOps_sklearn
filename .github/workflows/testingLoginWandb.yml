@@ -1,1 +1,26 @@
+name: Login to W&B
+
+on:
+  workflow_dispatch:  # ejecución manual
+
+jobs:
+  login:
+    runs-on: ubuntu-latest
+    env:
+      WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}   # asegúrate de crear este secret
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install W&B
+        run: pip install "wandb>=0.16"
+
+      - name: Login to W&B
+        run: wandb login $WANDB_API_KEY
 
