@@ -1,6 +1,12 @@
 name: Load Raw Data to W&B (artifact)
 
 on:
+
+  # Se ejecuta automáticamente cuando termine el workflow de Login
+  workflow_run:
+    workflows: ["Login to W&B"]
+    types: [completed]
+    
   push:
     branches: [ main ]
     paths:
